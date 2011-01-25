@@ -1,0 +1,17 @@
+{
+    "name": "skuld",
+    "description": "Skuld consensus engine",
+    "version": "0.0.1",
+    "homepage" : "http://github.com/tilgovi/skuld",
+    "engines": {"node": ">= 0.3.0"},
+    "author": "Randall Leeds <randall.leeds@gmail.com>",
+    "main": "bin/skuld",
+    "repository" : {
+        "type" : "git",
+         "url" : "http://github.com/tilgovi/skuld.git"
+    },
+    "licenses": [{
+        "type": "MIT",
+        "url": "http://www.opensource.org/licenses/mit-license.php"}
+    ]
+}
