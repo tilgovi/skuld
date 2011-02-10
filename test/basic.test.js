@@ -13,67 +13,49 @@ charlie.name = "Charlie";
 var consensus = {
   norns : [],
 
-//  prepare : function(leader, skuld) {
-//    function (leader, skuld, mark, promise) {
+  propose : function(leader, skuld) {
+    leader.propose(skuld, this.prepare.bind(this, leader, skuld));
+  },
 
-};
-consensus.norns.push(alice, bob, charlie);
-
-consensus.prepare = function (leader, skuld, mark, promise) {
-  var count = 0;
-  var quorum = Math.floor(((this.norns.length - 1) / 2) + 1);
-  var learners = [];
-  var fail = undefined;
-  this.norns.filter(function (n) {
-    return n != leader;
-  }).forEach(function (n, i) {
-    var index = i;
-    n.prepare(mark, function (err, mark, verdandi, accept) {
-      assert.ifError(err);
-      learners.push(n);
-      leader.promise(err, mark, verdandi, function(err, mark, wyrd) {
-        if (++count >= quorum) {
-          var l;
-          while (l = learners.pop()) {
-            l.accept(mark, skuld);
-          };
+  prepare : function(leader, skuld, mark) {
+    var count = 0;
+    var quorum = Math.floor(((this.norns.length) / 2) + 1);
+    var learners = [];
+    this.norns.forEach(function (n, i) {
+      n.prepare(mark, function (err, verdandi, accept) {
+        if (err) {
+          skuld = verdandi;
+          leader.accept(mark, verdandi);
+          return;
         }
-        if (count == quorum) {
-          console.log("Decided:", mark, skuld);
+        console.log("[", mark, "]", n.name, "promised", verdandi);
+        learners.unshift(accept);
+        if (++count >= quorum) {
+          while(learners.length) {
+            learners.pop()(skuld);
+          }
         }
       });
     });
-  });
+  }
 };
+consensus.norns.push(alice, bob, charlie);
 
-function propose(leader, skuld) {
-  leader.propose(skuld, function (mark, promise) {
-    setTimeout(function () {
-      try {
-        consensus.prepare(leader, skuld, mark, promise);
-      } catch (err) {
-        console.log("Failed:", skuld, leader);
-        propose(leader, skuld);
-      }
-    }, Math.random()*100);
-  });
-}
+var propose = function(leader, skuld) {
+  setTimeout(
+    consensus.propose.bind(consensus),
+    Math.random() * 1000,
+    leader,
+    skuld);
+};
 
 propose(alice, "Hello, World!");
 propose(bob, "Goodbye, cruel World!");
 propose(charlie, "Bacon?");
 
-process.on("exit", function() {
+
+process.on("exit", function () {
   console.log("Alice:", alice);
   console.log("Bob:", bob);
   console.log("Charlie:", charlie)
 });
-/*
-var han = norn.createNorn({
-  prepare: function (mark, promise) {
-    promise(null, mark);
-  }
-});
-
-han.propose("Hello, World!");
-*/
