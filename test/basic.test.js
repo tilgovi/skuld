@@ -1,61 +1,25 @@
-require('./test.js');
+require("./test.js");
 var assert = require("assert");
 var util = require("util");
-var Norn = require('norn').Norn;
+var norn = require("norn");
 
-var alice = new Norn();
+var consensus = new norn.createConsensus();
+
+var alice = norn.createNorn(consensus);
 alice.name = "Alice";
-var bob = new Norn();
+
+var bob = norn.createNorn(consensus);
 bob.name = "Bob";
-var charlie = new Norn();
+
+var charlie = norn.createNorn(consensus);
 charlie.name = "Charlie";
 
-var consensus = {
-  norns : [],
-
-  propose : function(leader, skuld) {
-    leader.propose(skuld, this.prepare.bind(this, leader, skuld));
-  },
-
-  prepare : function(leader, skuld, mark) {
-    var count = 0;
-    var quorum = Math.floor(((this.norns.length) / 2) + 1);
-    var learners = [];
-    this.norns.forEach(function (n, i) {
-      n.prepare(mark, function (err, verdandi, accept) {
-        if (err) {
-          skuld = verdandi;
-          leader.accept(mark, verdandi);
-          return;
-        }
-        console.log("[", mark, "]", n.name, "promised", verdandi);
-        learners.unshift(accept);
-        if (++count >= quorum) {
-          while(learners.length) {
-            learners.pop()(skuld);
-          }
-        }
-      });
-    });
-  }
-};
-consensus.norns.push(alice, bob, charlie);
-
-var propose = function(leader, skuld) {
-  setTimeout(
-    consensus.propose.bind(consensus),
-    Math.random() * 1000,
-    leader,
-    skuld);
-};
-
-propose(alice, "Hello, World!");
-propose(bob, "Goodbye, cruel World!");
-propose(charlie, "Bacon?");
-
+alice.propose("Hello, World!");
+bob.propose("Goodbye, cruel World!");
+charlie.propose("Bacon?");
 
 process.on("exit", function () {
-  console.log("Alice:", alice);
-  console.log("Bob:", bob);
-  console.log("Charlie:", charlie)
+  console.log("Alice:", alice.wyrd);
+  console.log("Bob:", bob.wyrd);
+  console.log("Charlie:", charlie.wyrd);
 });
