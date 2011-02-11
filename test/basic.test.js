@@ -14,12 +14,20 @@ bob.name = "Bob";
 var charlie = norn.createNorn(consensus);
 charlie.name = "Charlie";
 
-alice.propose("Hello, World!");
-bob.propose("Goodbye, cruel World!");
-charlie.propose("Bacon?");
+var propose = function (leader, skuld) {
+  setTimeout(
+    leader.propose.bind(leader),
+    Math.random() * 100,
+    skuld,
+    consensus.prepare.bind(consensus));
+}
+
+propose(alice, "Hello, World!");
+propose(bob, "Goodbye, cruel World!");
+propose(charlie, "Bacon?");
 
 process.on("exit", function () {
-  console.log("Alice:", alice.wyrd);
-  console.log("Bob:", bob.wyrd);
-  console.log("Charlie:", charlie.wyrd);
+  assert.equal(alice.wyrd, bob.wyrd, "Alice and Bob agree");
+  assert.equal(bob.wyrd, charlie.wyrd, "Bob and Charlie agree");
+  console.log(alice.wyrd);
 });
