@@ -1,17 +1,17 @@
 require("./test.js");
 var assert = require("assert");
 var util = require("util");
-var norn = require("norn");
+var skuld = require("skuld");
 
-var consensus = new norn.createConsensus();
+var consensus = new skuld.createConsensus();
 
-var alice = norn.createNorn(consensus);
+var alice = skuld.createNorn(consensus);
 alice.name = "Alice";
 
-var bob = norn.createNorn(consensus);
+var bob = skuld.createNorn(consensus);
 bob.name = "Bob";
 
-var charlie = norn.createNorn(consensus);
+var charlie = skuld.createNorn(consensus);
 charlie.name = "Charlie";
 
 var propose = function (leader, skuld) {
