@@ -3,19 +3,29 @@ var assert = require("assert");
 var util = require("util");
 var skuld = require("skuld");
 
-var alice = skuld.createNorn({name : "Alice"});
-var bob = skuld.createNorn({name : "Bob"});
-var charlie = skuld.createNorn({name : "Charlie"});
+var alice = {name : "Alice"};
+var bob = {name : "Bob"};
+var charlie = {name : "Charlie"};
+
+alice.learn = console.log.bind("Alice learned");
 
 var consensus =
-  skuld.createConsensus().
-  add(alice).
+  skuld.createConsensus()
+  .add(alice)
+  .add(bob)
+  .add(charlie);
+
+consensus.print();
+
+/*consensus.add(alice);
   add(bob).
   add(charlie);
+*/
 
-console.log("Consensus:", consensus);
+/*
+  function (n)
 
-var propose = function (leader, skuld, cb) {
+/*var propose = function (leader, skuld, cb) {
   setTimeout(
     leader.propose.bind(leader),
     Math.random() * 100,
@@ -33,4 +43,4 @@ process.on("exit", function () {
   assert.equal(alice.wyrd, bob.wyrd, "Alice and Bob agree");
   assert.equal(bob.wyrd, charlie.wyrd, "Bob and Charlie agree");
   console.log(alice.wyrd);
-});
+});*/
