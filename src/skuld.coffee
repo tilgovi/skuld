@@ -47,11 +47,8 @@ TConsensus = Trait {
 Consensus = (norns) ->
   Trait.create Object.prototype
   , (Trait.override (Trait {
-    unit : (norns) ->
-      Consensus norns
-    add : (norn) ->
-      @bind (old) ->
-        Consensus old.concat norn
+    unit : (norns) -> Consensus norns
+    add : (norn) -> @bind (old) => @unit old.concat norn
     prepare : (skuld) -> throw "NI"
     remove : (norns) -> throw "NI"
 #    toString : () -> @bind (norns) -> "Consensus(#{norns})"

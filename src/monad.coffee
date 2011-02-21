@@ -17,7 +17,7 @@ TMonad = Trait
         value
   log : () ->           #Loggable!
     util.log @toString()
-    @unit (@bind (value) -> value)
+    @bind (value) => @unit value
 
 #Actual!
 Just = (value) ->
