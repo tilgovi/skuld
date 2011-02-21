@@ -100,13 +100,4 @@ Consensus = (norns) ->
   }
   , TConsensus List norns
 
-    #@bind (norns) ->
-    #  new Consensus
-    #    norns.concat Trait.create
-    #      mark : @norns.length
-    #    TNorn
-    #    mark : -1
-    #    verdandi : TSkuld
-    #  }, TNorn(norn)
-
 exports.createConsensus = Consensus
