@@ -16,9 +16,9 @@ TMonad = Trait
       switch Object.getOwnPropertyDescriptor(value, 'toString')
         when undefined then util.inspect value
         else value.toString()
-  print : () ->
+  log : () ->
     @bind (value) ->
-      console.log "[LOG: HH:MM:SS] #{value}"
+      util.log "#{value}"
       value.unit value
 
 #Actual!
