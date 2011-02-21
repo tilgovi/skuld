@@ -16,37 +16,33 @@ TMonad = Trait
       switch Object.getOwnPropertyDescriptor(value, 'toString')
         when undefined then util.inspect value
         else value.toString()
+  print : () ->
+    @bind (value) ->
+      console.log "[LOG: HH:MM:SS] #{value}"
+      value.unit value
 
 #Actual!
 Just = (value) -> Trait.create {
   unit : (value) -> Just value
-  bind : (fn) -> fn value }, TMonad
+  bind : (fn) -> fn value
+}, TMonad
 
 #Nacktual!!
 None = Trait.create {
-  unit : None
-  bind : (fn) -> None }, TMonad
+  unit : () -> None
+  bind : (fn) -> None
+  toString : () -> "<None>"
+}, TMonad
 
 #Maybe?
 Maybe = (value) -> if value then Just value else None
 
-# Yummy (maple) logging syrup!
-# Maybe make a sick logging module here???!?!? yeah!?
-IO = Trait.compose TMonad, Trait {
-  toString : Trait.required
-  print : () ->
-    console.log "[LOG: HH:MM:SS]", this.toString()
-    this
-}
-
 # Really? Lists?
 List = (items = []) ->
-  list = Trait.create Object.prototype, (Trait.override (Trait {
+  Trait.create (Just items), (Trait.override (Trait {
     unit : (items) -> List items
-    bind : (fn) -> fn items
     toString : () -> "List([#{items}])"
-  }), IO, TMonad)
-  return list
+  }), TMonad)
 
 TComparable = Trait { compareTo : Trait.required }
 
@@ -83,22 +79,25 @@ createNorn = (prototype = Object.prototype) ->
   , []
   Trait.create (Just prototype), (Trait.compose traits...)
 
-TConsensus = (norns) -> Trait.compose TMonad, IO, Trait
+TConsensus = (norns) -> Trait.compose TMonad, Trait {
   bind : (fn) -> fn norns
   norns : norns
   prepare : Trait.required
   bind : (fn) -> fn norns
   add : Trait.required
   remove : Trait.required
+}
 
 Consensus = (norns) ->
   Trait.create {
     unit : (norns) -> Consensus norns
     add : (norn) ->
+      console.log "Adding #{norn} to #{@norns}"
       @norns.bind (old) ->
         Consensus old.concat (createNorn norn)
     prepare : (skuld) -> throw "NI"
-    remove : (norns) -> throw "NI" }
+    remove : (norns) -> throw "NI"
+  }
   , TConsensus List norns
 
     #@bind (norns) ->
