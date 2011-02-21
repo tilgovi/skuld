@@ -92,7 +92,6 @@ Consensus = (norns) ->
   Trait.create {
     unit : (norns) -> Consensus norns
     add : (norn) ->
-      console.log "Adding #{norn} to #{@norns}"
       @norns.bind (old) ->
         Consensus old.concat (createNorn norn)
     prepare : (skuld) -> throw "NI"
