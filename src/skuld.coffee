@@ -51,7 +51,7 @@ Consensus = (norns) ->
     add : (norn) -> @bind (old) => @unit old.concat norn
     prepare : (skuld) -> throw "NI"
     remove : (norns) -> throw "NI"
-#    toString : () -> @bind (norns) -> "Consensus(#{norns})"
+    toString : () -> @bind (norns) => "Consensus(#{norns})"
   })
   , (List norns), TConsensus)
 
