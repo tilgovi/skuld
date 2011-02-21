@@ -9,9 +9,12 @@ TMonad = Trait
   bind : Trait.required #Bindable!
   toString : () ->      #Presentable!
     @bind (value) ->
-      switch (Object.getOwnPropertyDescriptor(value, 'toString'))
-        when undefined then util.inspect value
-        else value.toString()
+      try
+        switch (Object.getOwnPropertyDescriptor(value, 'toString'))
+          when undefined then util.inspect value
+          else value.toString()
+      catch error
+        value
   log : () ->           #Loggable!
     util.log @toString()
     @unit (@bind (value) -> value)
