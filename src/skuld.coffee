@@ -13,22 +13,22 @@ TMonad = Trait
   bind : Trait.required
   toString : () ->
     @bind (value) ->
-      switch Object.getOwnPropertyDescriptor(value, 'toString')
+      switch (Object.getOwnPropertyDescriptor(value, 'toString'))
         when undefined then util.inspect value
         else value.toString()
   log : () ->
-    @bind (value) ->
-      util.log "#{value}"
-      value.unit value
+    util.log @toString()
+    @unit (@bind (value) -> value)
 
 #Actual!
-Just = (value) -> Trait.create {
-  unit : (value) -> Just value
-  bind : (fn) -> fn value
-}, TMonad
+Just = (value) ->
+  Trait.compose (Trait {
+    unit : (value) -> Trait.create Object.prototype, (Just value)
+    bind : (fn) -> fn value
+  }), TMonad
 
 #Nacktual!!
-None = Trait.create {
+None = Trait.override {
   unit : () -> None
   bind : (fn) -> None
   toString : () -> "<None>"
@@ -39,20 +39,21 @@ Maybe = (value) -> if value then Just value else None
 
 # Really? Lists?
 List = (items = []) ->
-  Trait.create (Just items), (Trait.override (Trait {
+  Trait.override (Trait {
     unit : (items) -> List items
     toString : () -> "List([#{items}])"
-  }), TMonad)
+  })
+  , (Just items)
 
-TComparable = Trait { compareTo : Trait.required }
+#TComparable = Trait { compareTo : Trait.required }
 
-Skuld = (mark, value) ->
-  Trait.create {
-    bind : (fn) -> fn value
-    compareTo : (other) ->
-      if mark is other then 0 else if mark < other then -1 else 1
-  }
-  , (Trait.compose TMonad, TComparable)
+#Skuld = (mark, value) ->
+#  Trait.create {
+#    bind : (fn) -> fn value
+#    compareTo : (other) ->
+#      if mark is other then 0 else if mark < other then -1 else 1
+#  }
+#  , (Trait.compose TMonad, TComparable)
 
 TProposer = Trait
   propose : Trait.required
@@ -68,7 +69,7 @@ TLearner = Trait
   learn : Trait.required
 
 roles = [TProposer, TAcceptor, TLearner]
-createNorn = (prototype = Object.prototype) ->
+exports.createNorn = createNorn = (prototype = Object.prototype) ->
   traits =
   roles.reduce (traits, role) ->
     try
@@ -77,26 +78,26 @@ createNorn = (prototype = Object.prototype) ->
     catch error
       traits
   , []
-  Trait.create (Just prototype), (Trait.compose traits...)
+  Trait.create Object.prototype, Trait.compose (Just prototype), traits...
 
-TConsensus = (norns) -> Trait.compose TMonad, Trait {
-  bind : (fn) -> fn norns
-  norns : norns
+TConsensus = Trait {
   prepare : Trait.required
-  bind : (fn) -> fn norns
   add : Trait.required
   remove : Trait.required
 }
 
 Consensus = (norns) ->
-  Trait.create {
-    unit : (norns) -> Consensus norns
+  Trait.create Object.prototype
+  , (Trait.override (Trait {
+    unit : (norns) ->
+      Consensus norns
     add : (norn) ->
-      @norns.bind (old) ->
-        Consensus old.concat (createNorn norn)
+      @bind (old) ->
+        Consensus old.concat norn
     prepare : (skuld) -> throw "NI"
     remove : (norns) -> throw "NI"
-  }
-  , TConsensus List norns
+#    toString : () -> @bind (norns) -> "Consensus(#{norns})"
+  })
+  , (List norns), TConsensus)
 
 exports.createConsensus = Consensus

@@ -3,27 +3,18 @@ var assert = require("assert");
 var util = require("util");
 var skuld = require("skuld");
 
-var alice = {name : "Alice"};
-var bob = {name : "Bob"};
-var charlie = {name : "Charlie"};
+var alice = skuld.createNorn({name : "Alice"});
+var bob = skuld.createNorn({name : "Bob"});
+var charlie = skuld.createNorn({name : "Charlie"});
 
-alice.learn = console.log.bind("Alice learned");
-
+//alice.log();
 var consensus =
   skuld.createConsensus()
   .add(alice)
   .add(bob)
-  .add(charlie);
-
-consensus.print();
-
-/*consensus.add(alice);
-  add(bob).
-  add(charlie);
-*/
+  .add(charlie).log();
 
 /*
-  function (n)
 
 /*var propose = function (leader, skuld, cb) {
   setTimeout(
