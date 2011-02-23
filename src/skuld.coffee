@@ -27,32 +27,31 @@ TLearner = Trait
   learn : Trait.required
 
 roles = [TProposer, TAcceptor, TLearner]
-exports.createNorn = createNorn = (prototype = Object.prototype) ->
-  traits =
-  roles.reduce (traits, role) ->
+Norn = (base = {}) ->
+  traits = roles.reduce (traits, role) ->
     try
-      Trait.create prototype, (Trait.compose traits, role)
+      Trait.create Object.prototype, (Trait.compose traits, role)
       traits.concat role
     catch error
       traits
-  , []
-  Trait.create Object.prototype, Trait.compose (Just prototype), traits...
+  , (Trait.compose (TMonad base), Trait { unit : Norn })
+  Trait.create Object.prototype, (Trait.compose traits)
 
-TConsensus = Trait {
+TConsensus = (norns = (List [])) -> Trait.compose (Trait {
   prepare : Trait.required
   add : Trait.required
-  remove : Trait.required
-}
+  remove : Trait.required })
+  , (TMonad norns)
 
-Consensus = (norns) ->
-  Trait.create Object.prototype
+Consensus = (norns) -> Trait.create Object.prototype, (Trait.compose (Trait {
+  unit : Consensus
+  add : (norn) -> @bind (norns) => @unit norns.concat (Just norn)
+  prepare : (skuld) -> throw "NI"
+  remove : (norn) -> throw "NI" })
   , (Trait.override (Trait {
-    unit : (norns) -> Consensus norns
-    add : (norn) -> @bind (old) => @unit old.concat norn
-    prepare : (skuld) -> throw "NI"
-    remove : (norns) -> throw "NI"
-    toString : () -> @bind (norns) => "Consensus(#{norns})"
-  })
-  , (List norns), TConsensus)
+    toString : () -> @bind (norns) => "Consensus(#{norns})" })
+    , (TConsensus norns)))
 
+# Exports
+exports.createNorn = Norn
 exports.createConsensus = Consensus

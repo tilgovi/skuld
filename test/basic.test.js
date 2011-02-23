@@ -3,7 +3,7 @@ var assert = require("assert");
 var util = require("util");
 var skuld = require("skuld");
 
-var alice = skuld.createNorn({name : "Alice"});
+var alice = skuld.createNorn({name : "Alice"}).log();
 var bob = skuld.createNorn({name : "Bob"});
 var charlie = skuld.createNorn({name : "Charlie"});
 

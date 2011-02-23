@@ -3,46 +3,38 @@
 Trait = (require 'traits').Trait
 util = require 'util'
 
-#Monads are awesome.
-TMonad = Trait
-  unit : Trait.required #Constructable!
-  bind : Trait.required #Bindable!
-  toString : () ->      #Presentable!
-    @bind (value) ->
-      try
-        switch (Object.getOwnPropertyDescriptor(value, 'toString'))
-          when undefined then util.inspect value
-          else value.toString()
-      catch error
-        value
-  log : () ->           #Loggable!
-    util.log @toString()
-    @bind (value) => @unit value
+# Monads are awesome!
+TMonad = (value) -> Trait
+  unit : Trait.required               # Constructable!
+  bind : (fn) -> fn value             # Bindable!
 
-#Actual!
-Just = (value) ->
-  Trait.compose (Trait {
-    unit : (value) -> Trait.create Object.prototype, (Just value)
-    bind : (fn) -> fn value
-  }), TMonad
+  # These could break out into top level traits but now this is useful.
+  inspect : () -> util.inspect value  # Presentable!
+  log : () ->                         # Loggable!
+    util.log @inspect()
+    @unit value
 
-#Nacktual!!
-None = Trait.override {
+# Just a simple value monad.
+Just = (value) -> Trait.create Object.prototype, (Trait.compose (Trait {
+  unit : Just })
+  , (TMonad value))
+
+# Not a value.
+None = Trait.create Object.prototype, (Trait.override (Trait {
   unit : () -> None
-  bind : (fn) -> None
-  toString : () -> "<None>"
-}, TMonad
+  bind : (fn) -> None })
+  , (TMonad null))
 
-#or quietly, possibly nothing at all...
+# Possibly a value or possibly, quietly nothing at all...
 Maybe = (value) -> if value then Just value else None
 
-# Toto, I don't think we're in JavaScript anymore.
-List = (items = []) ->
-  Trait.override (Trait {
-    unit : (items) -> List items
-    toString : () -> "List([#{items}])"
-  })
-  , (Just items)
+# There comes a time in every coder's life when...
+List = (items = []) -> Trait.create Object.prototype, (Trait.override (Trait {
+  unit : List
+  length : items.length # Safe because the value is copied
+  concat : (va...) -> @bind (array) => @unit (array.concat va...)
+  sort : (fn) -> @unit ((Array items...).sort fn) })
+  , (TMonad items.slice()))
 
 exports.TMonad = TMonad
 exports.Just = Just
