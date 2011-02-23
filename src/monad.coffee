@@ -21,6 +21,7 @@ Just = (value) -> Trait.create Object.prototype, (Trait.compose (Trait {
 
 # Not a value.
 None = Trait.create Object.prototype, (Trait.override (Trait {
+  inspect: () -> "<None>"
   unit : () -> None
   bind : (fn) -> None })
   , (TMonad null))
