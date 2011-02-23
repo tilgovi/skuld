@@ -12,7 +12,7 @@ TMonad = (value) -> Trait
   inspect : () -> util.inspect value  # Presentable!
   log : () ->                         # Loggable!
     util.log @inspect()
-    @unit value
+    this
 
 # Just a simple value monad.
 Just = (value) -> Trait.create Object.prototype, (Trait.compose (Trait {
