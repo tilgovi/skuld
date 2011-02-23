@@ -39,5 +39,5 @@ List = (items = []) -> Trait.create Object.prototype, (Trait.override (Trait {
 
 exports.TMonad = TMonad
 exports.Just = Just
-exports.None = None
+exports.Nothing = Nothing
 exports.List = List
