@@ -30,9 +30,7 @@ Maybe = (value) -> if value then Just value else None
 
 # Haskell-style List with indeterminate binding!
 List = (items) ->
-  # Keep us safe from naughty users mutating the underlying Array.
-  items = if items then items.slice() else []
-
+  items = if items then items.slice() else [] # Nasty Mutability, begone!
   Trait.create Object.prototype, (Trait.override (Trait {
   unit : List
   bind : (fn) ->
