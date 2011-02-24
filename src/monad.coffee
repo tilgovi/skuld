@@ -29,13 +29,20 @@ Nothing = Trait.create Object.prototype, (Trait.override (Trait {
 # Possibly a value or possibly, quietly nothing at all...
 Maybe = (value) -> if value then Just value else None
 
-# There comes a time in every coder's life when...
-List = (items = []) -> Trait.create Object.prototype, (Trait.override (Trait {
+# Haskell-style List with indeterminate binding!
+List = (items) ->
+  # Keep us safe from naughty users mutating the underlying Array.
+  items = if items then items.slice() else []
+
+  Trait.create Object.prototype, (Trait.override (Trait {
   unit : List
-  length : items.length # Safe because the value is copied
-  concat : (va...) -> @bind (array) => @unit (array.concat va...)
-  sort : (fn) -> @unit ((Array items...).sort fn) })
-  , (TMonad items.slice()))
+  bind : (fn) ->
+    @unit Array.prototype.concat (
+      for result in items.map (fn.bind this)
+        switch result == Nothing
+          when true then []
+          else result.bind ((valueOrItems) -> valueOrItems)) })
+  , (TMonad items))
 
 exports.TMonad = TMonad
 exports.Just = Just
