@@ -19,7 +19,7 @@ Just = (value) -> Trait.create Object.prototype, (Trait.compose (Trait {
   , (TMonad value))
 
 # Not a value.
-Nothing = Trait.create Object.prototype, (Trait.override (Trait {
+Nothing = Trait.create null, (Trait.override (Trait {
   inspect: () -> "<Nothing>"
   unit : () -> Nothing
   bind : (fn) -> Nothing })
