@@ -7,8 +7,6 @@ util = require 'util'
 TMonad = (value) -> Trait
   unit : Trait.required               # Constructable!
   bind : (fn) -> fn.call this, value  # Bindable!
-
-  # These could break out into top level traits but now this is useful.
   inspect : () -> util.inspect value  # Presentable!
   log : () ->                         # Loggable!
     util.log @inspect()
