@@ -7,6 +7,7 @@ util = require 'util'
 TMonad = (value) -> Trait
   unit : Trait.required               # Constructable!
   bind : (fn) -> fn.call this, value  # Bindable!
+  valueOf : () -> value.valueOf()     # Uwrappable!
   inspect : () -> util.inspect value  # Presentable!
   log : () ->                         # Loggable!
     util.log @inspect()
@@ -35,11 +36,10 @@ List = (items) ->
   Trait.create Object.prototype, (Trait.override (Trait {
   unit : List
   bind : (fn) ->
-    @unit Array.prototype.concat (
-      for result in items.map (fn.bind this)
-        switch result == Nothing
-          when true then []
-          else result.bind ((valueOrItems) -> valueOrItems)) })
+    @unit (Array.prototype.concat (
+        items.map (item) =>
+          (fn.call this, item).valueOf()
+      )... ) })
   , (TMonad items))
 
 exports.TMonad = TMonad
