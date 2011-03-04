@@ -79,6 +79,23 @@ concat = (lists...) ->
 concatMap = (fn, list) ->
   concat (map fn, list).valueOf()...
 
+# Stateful computations!
+State = (sfn) -> Trait.create Function.prototype, (Trait.override (Trait {
+  unit : (u) ->
+    State ((s) -> List u, s)
+  bind : (fn) ->
+    State ((s) =>
+      [result, state2] = runState this, s
+      runState (fn.call this, result), state2) })
+  , (TMonad sfn))
+
+put = (s) -> State ((_) -> List null, s)
+get = State ((s) -> List s, s)
+
+runState = (state, input) -> state.valueOf().call state, input
+evalState = (state, input) -> head (runState state, input)
+execState = (state, input) -> last (runState state, input)
+
 exports.TMonad = TMonad
 exports.Just = Just
 exports.Nothing = Nothing
