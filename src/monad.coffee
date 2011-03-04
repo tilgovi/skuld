@@ -96,7 +96,41 @@ runState = (state, input) -> state.valueOf().call state, input
 evalState = (state, input) -> head (runState state, input)
 execState = (state, input) -> last (runState state, input)
 
+#
+# Demonstration
+#
+
+demoTest = () ->
+  # Cross product
+  cross = (ls1, ls2) ->
+    ls1.bind ((x) ->
+      ls2.bind ((y) ->
+        List [x,y]))
+  (cross (List 'A','B'), (List 1, 2, 3)).log()
+
+  # Normal iteration
+  for item in (List 5, 6)
+    util.log item
+
+  # Some list operations
+  (reverse (append (List 5, 6), (List 7, 8))).log()
+  (intersperse 0, (List 1,2,3,4,5)).log()
+  (intercalate (List 0), (List (List 1, 2), (List 3, 4), (List 5, 6))).log()
+
+  # Simple state computations
+  countdown = get.bind (i) ->
+    util.log i
+    (put i-1).bind ->
+      @unit i
+
+  state = 10
+  while state > 0
+    state = execState countdown, state
+  util.log "Blast off!"
+exports.test = demoTest
+
 exports.TMonad = TMonad
 exports.Just = Just
 exports.Nothing = Nothing
 exports.List = List
+demoTest()
