@@ -38,9 +38,7 @@ Nothing = Trait.create null, (Trait.override (Trait {
 Maybe = (value) -> if value then Just value else None
 
 # Haskell-style List with indeterminate binding!
-List = (items) ->
-  items = if items then items.slice() else [] # Nasty Mutability, begone!
-  Trait.create Object.prototype, (Trait.override (Trait {
+List = (items...) -> Trait.create items, (Trait.override (Trait {
   unit : List
   bind : (fn) ->
     @unit (Array.prototype.concat (
