@@ -133,4 +133,3 @@ exports.TMonad = TMonad
 exports.Just = Just
 exports.Nothing = Nothing
 exports.List = List
-demoTest()
