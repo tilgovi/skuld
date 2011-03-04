@@ -5,7 +5,7 @@ util = require 'util'
 
 # Monads are awesome!
 TMonad = (value) -> Trait
-  unit : Trait.required                               # Constructable!
+  unit : Trait.required                              # Constructable!
   bind : (fn) -> fn.call this, value                  # Bindable!
   toString : () ->                                    # Stringable!
     if value and typeof value.toString == 'function'
