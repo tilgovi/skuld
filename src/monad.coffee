@@ -5,12 +5,21 @@ util = require 'util'
 
 # Monads are awesome!
 TMonad = (value) -> Trait
-  unit : Trait.required               # Constructable!
-  bind : (fn) -> fn.call this, value  # Bindable!
-  valueOf : () -> value.valueOf()     # Uwrappable!
-  inspect : () -> util.inspect value  # Presentable!
-  log : () ->                         # Loggable!
-    util.log @inspect()
+  unit : Trait.required                               # Constructable!
+  bind : (fn) -> fn.call this, value                  # Bindable!
+  toString : () ->                                    # Stringable!
+    if value and typeof value.toString == 'function'
+      value.toString()
+    else
+      value
+  valueOf : () ->                                     # Uwrappable!
+    if value and typeof value.valueOf == 'function'
+      value.valueOf()
+    else
+      value
+  inspect : () -> util.inspect value                  # Inspectable!
+  log : () ->                                         # Loggable!
+    util.log this
     this
 
 # Just a simple value monad.
