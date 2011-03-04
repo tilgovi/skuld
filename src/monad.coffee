@@ -40,12 +40,44 @@ Maybe = (value) -> if value then Just value else None
 # Haskell-style List with indeterminate binding!
 List = (items...) -> Trait.create items, (Trait.override (Trait {
   unit : List
-  bind : (fn) ->
-    @unit (Array.prototype.concat (
-        items.map (item) =>
-          (fn.call this, item).valueOf()
-      )... ) })
+  bind : (fn) -> concatMap fn, this })
   , (TMonad items))
+
+# Basic functions
+append = (left, right) -> List left..., right...
+
+head = (list) -> list.valueOf()[0]
+
+last = (list) -> list.valueOf()[list.length-1]
+
+tail = (list) -> List list[1..list.length]...
+
+init = (list) -> List list[1..list.length-1]...
+
+length = (list) -> list.length
+
+# List transformations
+
+map = (fn, list) -> List (list.map fn)...
+
+reverse = (list) ->
+  list = list.valueOf()
+  list.reverse()
+  List list...
+
+intersperse = (element, list) ->
+  List (list.valueOf().reduce ((acc, item) -> (Array acc..., element, item)))...
+
+intercalate = (list, lists) ->
+  (concat (intersperse list, lists).valueOf()...)
+
+# Special folds
+
+concat = (lists...) ->
+  List (Array.prototype.concat.call [], (list.valueOf() for list in lists)...)...
+
+concatMap = (fn, list) ->
+  concat (map fn, list).valueOf()...
 
 exports.TMonad = TMonad
 exports.Just = Just
