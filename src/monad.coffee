@@ -19,7 +19,7 @@ TMonad = (value) -> Trait
       value
   inspect : () -> util.inspect value                  # Inspectable!
   log : () ->                                         # Loggable!
-    util.log this
+    console.log this
     this
 
 # Just a simple value monad.
@@ -110,7 +110,7 @@ demoTest = () ->
 
   # Normal iteration
   for item in (List 5, 6)
-    util.log item
+    console.log item
 
   # Some list operations
   (reverse (append (List 5, 6), (List 7, 8))).log()
@@ -119,14 +119,14 @@ demoTest = () ->
 
   # Simple state computations
   countdown = get.bind (i) ->
-    util.log i
+    console.log i
     (put i-1).bind ->
       @unit i
 
   state = 10
   while state > 0
     state = execState countdown, state
-  util.log "Blast off!"
+  console.log "Blast off!"
 exports.test = demoTest
 
 exports.TMonad = TMonad
