@@ -80,7 +80,7 @@ concatMap = (fn, list) ->
   concat (map fn, list).valueOf()...
 
 # Stateful computations!
-State = (sfn) -> Trait.create Function.prototype, (Trait.override (Trait {
+State = (sfn) -> Trait.create sfn, (Trait.override (Trait {
   unit : (u) ->
     State ((s) -> List u, s)
   bind : (fn) ->
