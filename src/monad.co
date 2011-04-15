@@ -1,0 +1,161 @@
+# Monads!
+
+{Trait} = require 'traits'
+util = require 'util'
+
+exports =
+  TMonad, Just, Nothing, Maybe
+  List, State
+
+# Monads are awesome!
+TMonad = (value) -> Trait do
+  return : Trait.required                            # Constructable!
+  bind : (fn) -> fn.call this, value                  # Bindable!
+  toString : ->                                       # Stringable!
+    if value and typeof value.toString == 'function'
+      value.toString()
+    else
+      value
+  valueOf : ->                                        # Uwrappable!
+    if value and typeof value.valueOf == 'function'
+      value.valueOf()
+    else
+      value
+  inspect : -> util.inspect value                     # Inspectable!
+  log : ->                                            # Loggable!
+    console.log this
+    @return this
+
+# Just a simple value monad.
+Just = (value) -> Trait.create Object.prototype, Trait.compose do
+  Trait do
+    return : Just
+  TMonad value
+
+# Not a value.
+Nothing = Trait.create null, Trait.override do
+  Trait do
+    return : -> Nothing
+    bind : (fn) -> Nothing
+    valueOf : -> null
+  TMonad null
+
+# Possibly a value or possibly, quietly nothing at all...
+Maybe = (value) -> if value then Just value else None
+
+# Haskell-style List with indeterminate binding!
+TList = (items) -> Trait.compose do
+  Trait.override do
+    Trait do
+      return : List
+      bind : (fn) -> @concatMap fn
+    TMonad items
+  Trait do
+    # List basics functions
+    append : (rest) -> @return [...items, ...rest]
+    head : -> items[0]
+    last : -> items[*-1]
+    tail : -> List (items.slice 1)
+    init : -> List (items.slice 0, -1)
+
+    # List transformations
+    map : (fn) -> @return (items.map (fn.bind this))
+    reverse : ->
+      list = do items.slice
+      do list.reverse
+      @return list
+    intersperse : (element) ->
+      return this if not this.length
+      let ([first, ...rest] = this) ~>
+        @return rest.reduce do
+          (acc, item) -> acc.concat element, item
+          [first]
+    #intercalate : (list) -> (@concat ...(@intersperse list))
+
+    # Special folds
+    concat : (...lists) -> @return Array.prototype.concat ...[...items, ...lists]
+    concatMap : (fn) -> do (@map fn).concat
+
+List = (items) ->
+  # We need to do some trickery so V8 treats this like an Array.
+  # First, slice() the input Array to serve make an immutable prototype.
+  # Then, instantiate the TList Trait with this prototype.
+  # Create a new slice() to hold the result and assign its prototype.
+  # We need the two separate slices to avoid a circular prototype chain.
+  let (
+    proto = items.slice()
+    result = items.slice()
+  ) ->
+    result.__proto__ = Trait.create proto, TList proto
+    Object.freeze result
+
+# Stateful computations!
+State = (sfn) -> Trait.create Function.prototype, Trait.override do
+  Trait do
+    return : (u) -> State (s) -> List [u, s]
+    bind : (fn) ->
+      State (s) ~>
+        let ([result, state2] = @run s) ~>
+          (fn result).run state2
+
+    run : (input) -> sfn ...
+    eval : (input) -> do (@run input).head
+    exec : (input) -> do (@run input).last
+  TMonad sfn
+
+put = (s) -> State ((_) -> List [null, s])
+get = State ((s) -> List [s, s])
+
+#
+# Demonstration
+#
+
+do demoTest = ->
+  x = [9, 8]
+  a = List x
+  x.pop()
+  a.log()
+  console.log ...a.log()
+
+  a = (List [1, 2]).log()
+  # List objects work for Function.prototype.apply()
+  b = (List [...a]).log()
+  console.log Array.isArray a
+  console.log ...a
+  # concat still works with Lists or items like in JavaScript
+  console.log (List [1]).concat((List [2, 3]), 4).log().length
+  # Normal iteration and indexing still possible
+  console.log (item for item of (List <[ Learn you some crazy ]>)).join(' ')
+
+  # Indeterminate binding
+  (l <- (List [5]).bind
+    @return [l, l+1]).log()
+
+  # Direct product using nested binding
+  prod = (ls1, ls2) -> do
+    x <- ls1.bind
+    y <- ls2.bind
+    @return [[x, y]]
+  (prod (List ['A','B']), (List [1, 2, 3])).log()
+
+  # Some list operations
+  (List <[it reverse]>).append(List <[and it flip]>).reverse().log()
+  (List []).intersperse('y').log()
+  (List [1, 2, 3, 4, 5]).intersperse('x').log()
+  #((List 'x').intercalate (List (List 1, 2), (List 3, 4), (List 5, 6))).log()
+
+  # Stateful computations
+  console.log "Countdown..."
+  countdown = do
+    i <- get.bind
+    console.log i
+    if not i
+      console.log "Blast off!"
+      put void
+    else
+      put i-1
+
+  let (state = 10) ->
+    state = countdown.exec state while state is not void
+
+

@@ -5,6 +5,6 @@
 print = (data) -> console.log data.toString().trim()
 
 task 'dev', 'Live Development', ->
-  coffee = spawn 'coffee', '-wc --bare -o lib src'.split(' ')
-  coffee.stdout.on 'data', print
-  coffee.stderr.on 'data', print
+  coco = spawn 'coco', '-wc --bare -o lib src'.split(' ')
+  coco.stdout.on 'data', print
+  coco.stderr.on 'data', print

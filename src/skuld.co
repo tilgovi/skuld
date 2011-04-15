@@ -1,6 +1,5 @@
-Trait = (require 'traits').Trait
-util = require 'util'
-
+{Trait} = require 'traits'
+{log} = require 'util'
 {TMonad, Just, None, List} = require './monad'
 
 #TComparable = Trait { compareTo : Trait.required }
@@ -30,7 +29,7 @@ TLearner = Trait
 roles = [TAcceptor]
 Norn = (base = {}) ->
   Trait.create Object.prototype, (Trait.override (Trait base)
-    , (Trait.compose (TMonad base), roles..., Trait { unit: Norn }))
+    , (Trait.compose (TMonad base), ...roles, Trait { return: Norn }))
 
 TConsensus = (norns = (List [])) -> Trait.compose (Trait {
   prepare : Trait.required
@@ -39,8 +38,8 @@ TConsensus = (norns = (List [])) -> Trait.compose (Trait {
   , (TMonad norns)
 
 Consensus = (norns) -> Trait.create Object.prototype, (Trait.compose (Trait {
-  unit : Consensus
-  add : (norn) -> @bind (norns) => @unit norns.concat (Norn norn)
+  return : Consensus
+  add : (norn) -> @bind (norns) -> Consensus norns.concat (Norn norn)
   prepare : (skuld) -> throw "NI"
   remove : (norn) -> throw "NI" })
   , (TConsensus norns))
