@@ -26,16 +26,11 @@ TAcceptor = (mark, verdandi) -> Trait
 TLearner = Trait
   learn : Trait.required
 
-roles = [TProposer, TAcceptor, TLearner]
+#roles = [TProposer, TAcceptor, TLearner]
+roles = [TAcceptor]
 Norn = (base = {}) ->
-  traits = roles.reduce (traits, role) ->
-    try
-      Trait.create Object.prototype, (Trait.compose traits, role)
-      traits.concat role
-    catch error
-      traits
-  , (Trait.compose (TMonad base), Trait { unit : Norn })
-  Trait.create Object.prototype, (Trait.compose traits)
+  Trait.create Object.prototype, (Trait.override (Trait base)
+    , (Trait.compose (TMonad base), roles..., Trait { unit: Norn }))
 
 TConsensus = (norns = (List [])) -> Trait.compose (Trait {
   prepare : Trait.required
@@ -45,12 +40,10 @@ TConsensus = (norns = (List [])) -> Trait.compose (Trait {
 
 Consensus = (norns) -> Trait.create Object.prototype, (Trait.compose (Trait {
   unit : Consensus
-  add : (norn) -> @bind (norns) => @unit norns.concat (Just norn)
+  add : (norn) -> @bind (norns) => @unit norns.concat (Norn norn)
   prepare : (skuld) -> throw "NI"
   remove : (norn) -> throw "NI" })
-  , (Trait.override (Trait {
-    toString : () -> @bind (norns) => "Consensus(#{norns})" })
-    , (TConsensus norns)))
+  , (TConsensus norns))
 
 # Exports
 exports.createNorn = Norn
