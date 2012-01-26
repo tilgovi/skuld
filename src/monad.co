@@ -128,8 +128,9 @@ do demoTest = ->
   console.log (item for item of (List <[ Learn you some crazy ]>)).join(' ')
 
   # Indeterminate binding
-  (l <- (List [5]).bind
-    @return [l, l+1]).log()
+  <- (List [5]).bind
+  @return [it, it+1]
+  .log()
 
   # Direct product using nested binding
   prod = (ls1, ls2) -> do
