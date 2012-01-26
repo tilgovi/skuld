@@ -12,17 +12,17 @@
 #  }
 #  , (Trait.compose TMonad, TComparable)
 
-TProposer = Trait
+TProposer = Trait do
   propose : Trait.required
 
-TAcceptor = (mark, verdandi) -> Trait
+TAcceptor = (mark, verdandi) -> Trait do
   mark : mark
   verdandi : verdandi
   prepare : (mark, promise) ->
     promise ('nack' unless mark >= @mark), @wyrd
   #TODO accept : (mark, verdandi, ack) ->
 
-TLearner = Trait
+TLearner = Trait do
   learn : Trait.required
 
 #roles = [TProposer, TAcceptor, TLearner]
@@ -31,11 +31,12 @@ Norn = (base = {}) ->
   Trait.create Object.prototype, (Trait.override (Trait base)
     , (Trait.compose (TMonad base), ...roles, Trait { return: Norn }))
 
-TConsensus = (norns = (List [])) -> Trait.compose (Trait {
-  prepare : Trait.required
-  add : Trait.required
-  remove : Trait.required })
-  , (TMonad norns)
+TConsensus = (norns = (List [])) -> Trait.compose do
+  Trait do
+    prepare : Trait.required
+    add : Trait.required
+    remove : Trait.required
+  TMonad norns
 
 Consensus = (norns) -> Trait.create Object.prototype, (Trait.compose (Trait {
   return : Consensus
