@@ -66,7 +66,7 @@ TList = (items) -> Trait.compose do
       @return list
     intersperse : (element) ->
       return this if not this.length
-      let ([first, ...rest] = this) ~>
+      let ([first, ...rest] = this) then
         @return rest.reduce do
           (acc, item) -> acc.concat element, item
           [first]
@@ -85,7 +85,7 @@ List = (items) ->
   let (
     proto = items.slice()
     result = items.slice()
-  ) ->
+  ) then
     result.__proto__ = Trait.create proto, TList proto
     Object.freeze result
 
@@ -95,7 +95,7 @@ State = (sfn) -> Trait.create Function.prototype, Trait.override do
     return : (u) -> State (s) -> List [u, s]
     bind : (fn) ->
       State (s) ~>
-        let ([result, state2] = @run s) ~>
+        let ([result, state2] = @run s) then
           (fn result).run state2
 
     run : (input) -> sfn ...
@@ -156,7 +156,7 @@ do demoTest = ->
     else
       put i-1
 
-  let (state = 10) ->
+  let (state = 10) then
     state = countdown.exec state while state is not void
 
 
