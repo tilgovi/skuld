@@ -90,7 +90,7 @@ List = (items) ->
     Object.freeze result
 
 # Stateful computations!
-State = (sfn) -> Trait.create Function.prototype, Trait.override do
+TState = (sfn) -> Trait.override do
   Trait do
     return : (u) -> State (s) -> List [u, s]
     bind : (fn) ->
@@ -102,6 +102,8 @@ State = (sfn) -> Trait.create Function.prototype, Trait.override do
     eval : (input) -> do (@run input).head
     exec : (input) -> do (@run input).last
   TMonad sfn
+
+State = (sfn) -> Trait.create Function.prototype, (TState sfn)
 
 put = (s) -> State ((_) -> List [null, s])
 get = State ((s) -> List [s, s])
